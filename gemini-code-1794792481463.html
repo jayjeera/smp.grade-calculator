@@ -1,0 +1,794 @@
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+  .gpa-widget-wrapper {
+    font-family: 'Prompt', sans-serif;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border: 2px solid #3498db;
+    border-radius: 12px;
+    overflow: hidden;
+    color: #000000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  
+  .gpa-tabs { display: flex; background-color: #f1c40f; }
+  .gpa-tab-btn {
+    flex: 1; padding: 16px 8px; border: none; background: none;
+    font-family: 'Prompt', sans-serif; font-weight: 600; font-size: 15px; color: #000000;
+    cursor: pointer; transition: background 0.3s, color 0.3s; text-align: center;
+  }
+  .gpa-tab-btn:hover { background-color: #f39c12; }
+  .gpa-tab-btn.active { background-color: #3498db; color: #ffffff; }
+  
+  .gpa-tab-content { display: none; padding: 30px; background-color: #ffffff; }
+  .gpa-tab-content.active { display: block; }
+  .gpa-tab-content h3 { margin-top: 0; color: #2980b9; font-size: 22px; margin-bottom: 10px; }
+
+  /* กล่องเลือกแผนการเรียนในแท็บ GPA รายเทอม */
+  .gpa-track-box {
+    background-color: #f8fbfe;
+    border: 1px solid #d6eaf8;
+    border-radius: 8px;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+  }
+  .gpa-track-box label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+  }
+  .gpa-track-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
+    color: #2c3e50;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gpa-track-select:focus {
+    border-color: #2980b9;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+  }
+
+  .gpa-control-bar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+  .gpa-count-group label { display: block; font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #2c3e50; }
+  .gpa-count-group input { width: 120px; padding: 10px 14px; border: 1px solid #3498db; border-radius: 8px; font-family: 'Prompt', sans-serif; font-size: 16px; box-sizing: border-box; }
+  .gpa-row-buttons { display: flex; gap: 10px; }
+  
+  .btn-add-row { background-color: #27ae60; color: #ffffff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-family: 'Prompt', sans-serif; font-size: 15px; font-weight: 500; }
+  .btn-add-row:hover { background-color: #219150; }
+  .btn-remove-row { background-color: #e74c3c; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-family: 'Prompt', sans-serif; font-size: 15px; font-weight: 500; }
+  .btn-remove-row:hover { background-color: #c0392b; }
+
+  .gpa-table-container { border: 1px solid #d6eaf8; border-radius: 8px; overflow: hidden; background-color: #f8fbfe; }
+  .gpa-table-header { display: flex; background-color: #ebf5fb; padding: 12px 15px; font-weight: 600; color: #1b4f72; font-size: 15px; border-bottom: 1px solid #d6eaf8; text-align: center; }
+  .gpa-table-row { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #e5e8e8; background-color: #ffffff; }
+  .gpa-table-row:last-child { border-bottom: none; }
+
+  .col-no { width: 45px; font-weight: 600; color: #5d6d7e; text-align: center; }
+  .col-title { flex: 2; padding-right: 15px; }
+  .col-grade { flex: 1; padding-right: 15px; }
+  .col-credit { flex: 1; }
+
+  .gpa-table-row input, .gpa-table-row select {
+    width: 100%; padding: 10px 12px; border: 1px solid #bdc3c7; border-radius: 8px;
+    font-family: 'Prompt', sans-serif; font-size: 14px; box-sizing: border-box; background-color: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gpa-table-row input:focus, .gpa-table-row select:focus { border-color: #3498db; outline: none; }
+
+  input.input-error, select.input-error {
+    border-color: #e74c3c !important;
+    background-color: #fdf2e9 !important;
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.4) !important;
+  }
+
+  .gpa-btn-calc-main { background-color: #3498db; color: white; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-family: 'Prompt', sans-serif; font-weight: 600; font-size: 18px; width: 100%; margin-top: 25px; }
+  .gpa-btn-calc-main:hover { background-color: #2980b9; }
+
+  .gpa-guide-box { background-color: #fef9e7; border: 1px solid #f9e79f; border-radius: 8px; padding: 15px 20px; margin-bottom: 25px; }
+  .gpa-guide-box h4 { margin: 0 0 10px 0; color: #e74c3c; font-size: 16px; font-weight: 600; }
+  
+  .gpa-guide-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; color: #000000; }
+  .gpa-step-item { background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #f5b041; line-height: 1.4; }
+
+  .gpa-target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 25px; margin-bottom: 25px; }
+  .gpa-input-group label { display: block; font-size: 15px; margin-bottom: 6px; font-weight: 600; color: #2c3e50; }
+  .gpa-input-group input { width: 100%; padding: 12px 15px; border: 1px solid #bdc3c7; border-radius: 8px; font-family: 'Prompt', sans-serif; font-size: 15px; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; }
+  .gpa-helper-text { font-size: 12px; color: #7f8c8d; margin-top: 6px; display: block; line-height: 1.4; }
+
+  .gpa-result-box { margin-top: 25px; padding: 22px; background-color: #e8f4f8; border-left: 6px solid #3498db; border-radius: 8px; font-size: 18px; font-weight: 500; text-align: center; display: none; }
+  .gpa-target-badge { display: inline-block; padding: 8px 18px; border-radius: 20px; font-size: 15px; font-weight: 600; margin-top: 12px; }
+  .badge-easy { background-color: #d4edda; color: #155724; }
+  .badge-medium { background-color: #fff3cd; color: #856404; }
+  .badge-hard { background-color: #ffe8d6; color: #d35400; }
+  .badge-impossible { background-color: #f8d7da; color: #721c24; }
+
+  .btn-export-img { background-color: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Prompt', sans-serif; font-size: 15px; font-weight: 600; margin-top: 20px; width: 100%; }
+  .btn-export-img:hover { background-color: #219150; }
+
+  .subject-group-box { border: 1px solid #d6eaf8; border-radius: 10px; padding: 18px; margin-bottom: 20px; background-color: #fafbfc; }
+  .subject-group-box h4 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; display: flex; justify-content: space-between; align-items: center; }
+  .subject-group-badge { font-size: 14px; background-color: #e8f4f8; color: #2980b9; padding: 4px 12px; border-radius: 15px; font-weight: 500; }
+  .subject-summary-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; background-color: #ffffff; }
+  .subject-summary-table th, .subject-summary-table td { border: 1px solid #d6eaf8; padding: 10px 12px; text-align: center; }
+  .subject-summary-table th { background-color: #ebf5fb; color: #1b4f72; }
+
+  @media screen and (max-width: 768px) {
+    .gpa-widget-wrapper:not(.exporting-mode) { margin: 15px auto; border-radius: 10px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-tab-content { padding: 20px 15px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-tab-btn { font-size: 14px; padding: 12px 6px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-guide-steps { grid-template-columns: 1fr; gap: 8px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-target-grid { grid-template-columns: 1fr; gap: 15px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-input-group[style*="grid-column: span 2"] { grid-column: span 1 !important; }
+  }
+
+  @media screen and (max-width: 480px) {
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-tabs { display: grid; grid-template-columns: 1fr 1fr; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-tab-btn { padding: 12px 4px; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-tab-content h3 { font-size: 18px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-control-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-count-group input { width: 100%; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-row-buttons { width: 100%; }
+    .gpa-widget-wrapper:not(.exporting-mode) .btn-add-row, 
+    .gpa-widget-wrapper:not(.exporting-mode) .btn-remove-row { flex: 1; padding: 10px; font-size: 14px; text-align: center; }
+    
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-table-header { font-size: 12px; padding: 10px 4px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-table-row { padding: 10px 4px; gap: 4px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .col-no { width: 25px; font-size: 12px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .col-title, 
+    .gpa-widget-wrapper:not(.exporting-mode) .col-grade { padding-right: 4px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .col-title input, 
+    .gpa-widget-wrapper:not(.exporting-mode) .col-grade select, 
+    .gpa-widget-wrapper:not(.exporting-mode) .col-credit select, 
+    .gpa-widget-wrapper:not(.exporting-mode) .col-grade input, 
+    .gpa-widget-wrapper:not(.exporting-mode) .col-credit input { padding: 8px 6px; font-size: 13px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .subject-group-box h4 { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .gpa-widget-wrapper:not(.exporting-mode) .gpa-btn-calc-main { font-size: 16px; padding: 14px; }
+  }
+
+  .exporting-mode input::placeholder { color: #e0e0e0 !important; opacity: 1 !important; }
+</style>
+
+<div class="gpa-widget-wrapper" id="gpa-main-wrapper">
+  <div class="gpa-tabs">
+    <button class="gpa-tab-btn active" onclick="switchGpaTab(event, 'tab-gpa')">คำนวณ GPA (รายเทอม)</button>
+    <button class="gpa-tab-btn" onclick="switchGpaTab(event, 'tab-gpax')">คำนวณ GPAX (สะสม)</button>
+    <button class="gpa-tab-btn" onclick="switchGpaTab(event, 'tab-target')">คำนวณเกรดเป้าหมาย</button>
+    <button class="gpa-tab-btn" onclick="switchGpaTab(event, 'tab-groups')">คำนวณ GPAX 5 กลุ่มสาระ</button>
+  </div>
+
+  <!-- แท็บ 1: คำนวณ GPA รายเทอม -->
+  <div id="tab-gpa" class="gpa-tab-content active">
+    <h3>คำนวณเกรดเฉลี่ยรายเทอม (GPA)</h3>
+    <p style="font-size: 14px; color: #7f8c8d; margin-bottom: 20px;">เลือกแผนการเรียนหรือกรอกรายวิชาเอง พร้อมระบุเกรดและหน่วยกิตแต่ละวิชา เพื่อดูเกรดประจำเทอมนี้</p>
+
+    <div class="gpa-track-box">
+      <label for="gpa-study-track">เลือกแผนการเรียน / รูปแบบการกรอกข้อมูล</label>
+      <select id="gpa-study-track" class="gpa-track-select" onchange="onStudyTrackChange()">
+        <option value="custom">กรอกข้อมูลเอง</option>
+        <option value="sci-math">สายวิทย์ - คณิต</option>
+        <option value="arts-math">สายศิลป์ - คำนวณ</option>
+        <option value="arts-lang">สายศิลป์ - ภาษา</option>
+      </select>
+    </div>
+
+    <div class="gpa-control-bar">
+      <div class="gpa-count-group"><label>จำนวนวิชา</label><input type="number" id="gpa-rows-count" value="3" min="1" onchange="updateGpaRowsFromInput()"></div>
+      <div class="gpa-row-buttons"><button class="btn-add-row" onclick="addGpaRow()">+ เพิ่มแถว</button><button class="btn-remove-row" onclick="removeGpaRow()">— ลบแถว</button></div>
+    </div>
+
+    <div class="gpa-table-container">
+      <div class="gpa-table-header"><div class="col-no">ลำดับ</div><div class="col-title">ชื่อวิชา</div><div class="col-grade">เกรดที่ได้</div><div class="col-credit">หน่วยกิต</div></div>
+      <div id="gpa-table-body"></div>
+    </div>
+
+    <button class="gpa-btn-calc-main" onclick="calculateGpa()">คำนวณ</button>
+    <div id="gpa-result" class="gpa-result-box"></div>
+    <button id="btn-export-gpa" class="btn-export-img" style="display: none;" onclick="exportToImage('tab-gpa', 'btn-export-gpa', 'สรุปเกรด_GPA')">📸 ดาวน์โหลดผลลัพธ์เลย !</button>
+  </div>
+
+  <!-- แท็บ 2: คำนวณ GPAX สะสม -->
+  <div id="tab-gpax" class="gpa-tab-content">
+    <h3>คำนวณเกรดเฉลี่ยสะสม (GPAX)</h3>
+    <p style="font-size: 14px; color: #7f8c8d; margin-bottom: 20px;">กรอกเกรดรวมและหน่วยกิตรวมของแต่ละเทอม เพื่อดู GPAX สะสมทั้งหมด</p>
+    <div class="gpa-control-bar">
+      <div class="gpa-count-group"><label>จำนวนเทอม</label><input type="number" id="gpax-rows-count" value="3" min="1" onchange="updateGpaxRowsFromInput()"></div>
+      <div class="gpa-row-buttons"><button class="btn-add-row" onclick="addGpaxRow()">+ เพิ่มแถว</button><button class="btn-remove-row" onclick="removeGpaxRow()">— ลบแถว</button></div>
+    </div>
+    <div class="gpa-table-container">
+      <div class="gpa-table-header"><div class="col-no">ลำดับ</div><div class="col-title">ภาคเรียน / ปีการศึกษา</div><div class="col-grade">เกรดเฉลี่ย (GPA)</div><div class="col-credit">หน่วยกิตรวม</div></div>
+      <div id="gpax-table-body"></div>
+    </div>
+    <button class="gpa-btn-calc-main" onclick="calculateGpax()">คำนวณ</button>
+    <div id="gpax-result" class="gpa-result-box"></div>
+    <button id="btn-export-gpax" class="btn-export-img" style="display: none;" onclick="exportToImage('tab-gpax', 'btn-export-gpax', 'สรุปเกรด_GPAX')">📸 ดาวน์โหลดผลลัพธ์เลย !</button>
+  </div>
+
+  <!-- แท็บ 3: คำนวณเกรดเป้าหมาย -->
+  <div id="tab-target" class="gpa-tab-content">
+    <h3>คำนวณเป้าหมายเกรดที่ต้องการ</h3>
+    <p style="font-size: 14px; color: #7f8c8d; margin-bottom: 20px;">วางแผนการเรียน เพื่อดูว่าในเทอมที่เหลือต้องทำเกรดเฉลี่ยเท่าไหร่จึงจะถึงเป้าหมาย !</p>
+    <div class="gpa-guide-box">
+      <h4>📌 วิธีหาข้อมูลมาใส่ใน 5 ช่องด้านล่าง :</h4>
+      <div class="gpa-guide-steps">
+        <div class="gpa-step-item">1. เกรด & หน่วยกิตเดิม : เปิดดูในใบ ปพ.1 หรือใบแจ้งเกรดสะสมล่าสุด</div>
+        <div class="gpa-step-item">2. เกรดเป้าหมาย : ตั้งเป้าเกรดสะสมตอนเรียนจบที่อยากได้</div>
+        <div class="gpa-step-item">3. หน่วยกิตที่เหลือ : รวมหน่วยกิตของวิชาในเทอมต่อ ๆ ไปที่ยังไม่ได้เรียน</div>
+      </div>
+    </div>
+    <div class="gpa-target-grid">
+      <div class="gpa-input-group"><label>1. เกรดเฉลี่ยสะสมปัจจุบัน (GPAX)</label><input type="number" id="tg-current-gpax" placeholder="เช่น 2.75" step="0.01" oninput="validateInputRealtime(this, 'gpa'); saveDataToLocalStorage();"><span class="gpa-helper-text">💡 ดูเกรดสะสมรวมล่าสุดจากใบ ปพ.1</span></div>
+      <div class="gpa-input-group"><label>2. หน่วยกิตรวมที่เรียนผ่านมาแล้ว</label><input type="number" id="tg-current-credit" placeholder="เช่น 45" step="0.5" oninput="validateInputRealtime(this, 'credit'); saveDataToLocalStorage();"><span class="gpa-helper-text">💡 ผลรวมหน่วยกิตของเทอมก่อน ๆ ทั้งหมด</span></div>
+      <div class="gpa-input-group"><label>3. เกรดเป้าหมายที่อยากได้</label><input type="number" id="tg-target-gpax" placeholder="เช่น 3.00" step="0.01" oninput="validateInputRealtime(this, 'gpa'); saveDataToLocalStorage();"><span class="gpa-helper-text">💡 เกรดรวมตอนเรียนจบที่เราอยากได้</span></div>
+      <div class="gpa-input-group"><label>4. หน่วยกิตรวมของเทอมที่เหลือ</label><input type="number" id="tg-remain-credit" placeholder="เช่น 15" step="0.5" oninput="validateInputRealtime(this, 'credit'); saveDataToLocalStorage();"><span class="gpa-helper-text">💡 รวมหน่วยกิตเทอมต่อ ๆ ไป (ประมาณ 12 - 15 ต่อเทอม)</span></div>
+      <div class="gpa-input-group" style="grid-column: span 2;"><label>5. จำนวนเทอมที่เหลือก่อนเรียนจบ</label><input type="number" id="tg-remain-terms" placeholder="เช่น 2" step="1" oninput="validateInputRealtime(this, 'terms'); saveDataToLocalStorage();"><span class="gpa-helper-text">💡 ระบุจำนวนเทอมที่ยังไม่ได้เรียน เช่น เหลืออีก 1 เทอม หรือ 2 เทอม</span></div>
+    </div>
+    <button class="gpa-btn-calc-main" onclick="calculateTarget()">คำนวณ</button>
+    <div id="target-result" class="gpa-result-box"></div>
+    <button id="btn-export-target" class="btn-export-img" style="display: none;" onclick="exportToImage('tab-target', 'btn-export-target', 'เป้าหมายเกรด')">📸 ดาวน์โหลดผลลัพธ์เลย !</button>
+  </div>
+
+  <!-- แท็บ 4: คำนวณ GPAX 5 กลุ่มสาระ -->
+  <div id="tab-groups" class="gpa-tab-content">
+    <h3>คำนวณ GPAX แยก 5 กลุ่มสาระหลัก (สำหรับ TCAS)</h3>
+    <p style="font-size: 14px; color: #7f8c8d; margin-bottom: 20px;">กรอกเกรดรวมและหน่วยกิตรวมของแต่ละกลุ่มสาระวิชา เพื่อเช็กคุณสมบัติขั้นต่ำยื่นเข้ามหาวิทยาลัย</p>
+    <div class="gpa-guide-box">
+      <h4>📌 วิธีหาข้อมูลมาใส่ในแต่ละกลุ่มสาระ :</h4>
+      <div class="gpa-guide-steps">
+        <div class="gpa-step-item">1. ดูในใบ ปพ.1 (แสดงผลการเรียน) : เปิดดูตารางสรุปผลการเรียนด้านหลัง</div>
+        <div class="gpa-step-item">2. นำตัวเลขสรุปมาใส่ : นำเกรดเฉลี่ยสะสมและหน่วยกิตรวมของแต่ละหมวดมาใส่ได้ทันที (ไม่ต้องนั่งบวกวิชาเอง)</div>
+        <div class="gpa-step-item">3. เช็กเกณฑ์ TCAS : ดูว่าเกรดหมวดวิชาของเรา ผ่านเกณฑ์ขั้นต่ำของคณะที่อยากเข้าแล้วหรือยัง</div>
+      </div>
+    </div>
+    <div id="groups-container"></div>
+    <button class="gpa-btn-calc-main" onclick="calculateGroupsGpax()">คำนวณ</button>
+    <div id="groups-result" class="gpa-result-box"></div>
+    <button id="btn-export-groups" class="btn-export-img" style="display: none;" onclick="exportToImage('tab-groups', 'btn-export-groups', 'สรุปเกรด_5กลุ่มสาระ')">📸 ดาวน์โหลดผลลัพธ์เลย !</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const STORAGE_KEY = 'gpa_calculator_widget_v2';
+    const MSG_INVALID = '⚠️ พบข้อมูลไม่ถูกต้อง (กรอบสีแดง) ! กรุณาตรวจสอบเกรด (0.00-4.00) และหน่วยกิตอีกครั้งน้า';
+    const MSG_MISSING = '⚠️ กรุณากรอกข้อมูลให้ครบถ้วนทุกช่องน้า !';
+
+    // ชุดข้อมูลรายวิชาตามแผนการเรียน (ไม่ได้ตั้งค่าหน่วยกิตล่วงหน้า น้องต้องเลือกเอง)
+    const STUDY_TRACK_PRESETS = {
+      'custom': [],
+      'sci-math': [
+        'ฟิสิกส์',
+        'เคมี',
+        'ชีววิทยา',
+        'คณิตศาสตร์เพิ่มเติม',
+        'คณิตศาสตร์พื้นฐาน',
+        'ภาษาอังกฤษ',
+        'ภาษาไทย',
+        'สังคมศึกษา'
+      ],
+      'arts-math': [
+        'คณิตศาสตร์เพิ่มเติม',
+        'คณิตศาสตร์พื้นฐาน',
+        'ภาษาอังกฤษ',
+        'ภาษาไทย',
+        'วิทยาศาสตร์ทั่วไป',
+        'สังคมศึกษา'
+      ],
+      'arts-lang': [
+        'ภาษาอังกฤษ',
+        'ภาษาไทย',
+        'ภาษาที่สาม',
+        'วิทยาศาสตร์ทั่วไป',
+        'คณิตศาสตร์พื้นฐาน',
+        'สังคมศึกษา'
+      ]
+    };
+
+    const subjectGroups = [
+      { id: 'sci', name: '🧪 กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี' },
+      { id: 'math', name: '📐 กลุ่มสาระฯ คณิตศาสตร์' },
+      { id: 'eng', name: '🗣️ กลุ่มสาระฯ ภาษาต่างประเทศ' },
+      { id: 'thai', name: '📖 กลุ่มสาระฯ ภาษาไทย' },
+      { id: 'social', name: '🌏 กลุ่มสาระฯ สังคมศึกษา ศาสนา และวัฒนธรรม' }
+    ];
+
+    const creditOptions = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6];
+    let creditHTML = '<option value="">เลือกหน่วยกิต</option>';
+    creditOptions.forEach(c => creditHTML += `<option value="${c}">${c}</option>`);
+
+    const gradeOptions = [
+      {val: 4, label: '4 (A)'}, {val: 3.5, label: '3.5 (B+)'},
+      {val: 3, label: '3 (B)'}, {val: 2.5, label: '2.5 (C+)'},
+      {val: 2, label: '2 (C)'}, {val: 1.5, label: '1.5 (D+)'},
+      {val: 1, label: '1 (D)'}, {val: 0, label: '0 (F)'}
+    ];
+    let gradeHTML = '<option value="">เลือกเกรด</option>';
+    gradeOptions.forEach(g => gradeHTML += `<option value="${g.val}">${g.label}</option>`);
+
+    window.validateInputRealtime = function(el, type) {
+      if (el.value === '') { el.classList.remove('input-error'); return true; }
+      const val = parseFloat(el.value);
+      let isInvalid = false;
+      if (type === 'gpa') { if (isNaN(val) || val < 0 || val > 4.00) isInvalid = true; }
+      else if (type === 'credit') { if (isNaN(val) || val < 0) isInvalid = true; }
+      else if (type === 'terms') { if (isNaN(val) || val <= 0) isInvalid = true; }
+
+      if (isInvalid) { el.classList.add('input-error'); return false; }
+      else { el.classList.remove('input-error'); return true; }
+    };
+
+    window.clearSelectError = function(el) {
+      if (el.value !== '') el.classList.remove('input-error');
+    };
+
+    window.switchGpaTab = function(evt, tabName) {
+      document.querySelectorAll('.gpa-tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.gpa-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      evt.currentTarget.classList.add('active');
+    };
+
+    // =========================================================
+    // แท็บ 1: คำนวณ GPA รายเทอม + ตัวเลือกแผนการเรียน
+    // =========================================================
+    function createSingleGpaRow(index, data = {}) {
+      const row = document.createElement('div');
+      row.className = 'gpa-table-row gpa-item';
+      row.innerHTML = `
+        <div class="col-no">${index}</div>
+        <div class="col-title"><input type="text" class="gpa-title-input" placeholder="ระบุชื่อวิชา" value="${data.title || ''}" oninput="saveDataToLocalStorage()"></div>
+        <div class="col-grade"><select class="gpa-grade-input" onchange="clearSelectError(this); saveDataToLocalStorage()">${gradeHTML}</select></div>
+        <div class="col-credit"><select class="gpa-credit-input" onchange="clearSelectError(this); saveDataToLocalStorage()">${creditHTML}</select></div>
+      `;
+      if (data.grade !== undefined && data.grade !== '') row.querySelector('.gpa-grade-input').value = data.grade;
+      if (data.credit !== undefined && data.credit !== '') row.querySelector('.gpa-credit-input').value = data.credit;
+      return row;
+    }
+
+    window.onStudyTrackChange = function() {
+      const trackKey = document.getElementById('gpa-study-track').value;
+      const tbody = document.getElementById('gpa-table-body');
+      tbody.innerHTML = '';
+
+      const subjects = STUDY_TRACK_PRESETS[trackKey] || [];
+      if (trackKey === 'custom' || subjects.length === 0) {
+        for (let i = 1; i <= 3; i++) {
+          tbody.appendChild(createSingleGpaRow(i, { title: '', grade: '', credit: '' }));
+        }
+        document.getElementById('gpa-rows-count').value = 3;
+      } else {
+        subjects.forEach((subjectName, idx) => {
+          tbody.appendChild(createSingleGpaRow(idx + 1, { title: subjectName, grade: '', credit: '' }));
+        });
+        document.getElementById('gpa-rows-count').value = subjects.length;
+      }
+
+      document.getElementById('gpa-result').style.display = 'none';
+      document.getElementById('btn-export-gpa').style.display = 'none';
+      saveDataToLocalStorage();
+    };
+
+    window.addGpaRow = function(data = {}) {
+      const tbody = document.getElementById('gpa-table-body');
+      const currentCount = tbody.children.length;
+      tbody.appendChild(createSingleGpaRow(currentCount + 1, data));
+      document.getElementById('gpa-rows-count').value = currentCount + 1;
+      saveDataToLocalStorage();
+    };
+
+    window.removeGpaRow = function() {
+      const tbody = document.getElementById('gpa-table-body');
+      const currentCount = tbody.children.length;
+      if (currentCount > 1) {
+        tbody.removeChild(tbody.lastElementChild);
+        document.getElementById('gpa-rows-count').value = currentCount - 1;
+        saveDataToLocalStorage();
+      }
+    };
+
+    window.updateGpaRowsFromInput = function() {
+      const tbody = document.getElementById('gpa-table-body');
+      let targetCount = parseInt(document.getElementById('gpa-rows-count').value);
+      if (isNaN(targetCount) || targetCount < 1) targetCount = 1;
+      document.getElementById('gpa-rows-count').value = targetCount;
+      let currentCount = tbody.children.length;
+      if (targetCount > currentCount) {
+        for (let i = currentCount + 1; i <= targetCount; i++) tbody.appendChild(createSingleGpaRow(i));
+      } else if (targetCount < currentCount) {
+        for (let i = currentCount; i > targetCount; i--) tbody.removeChild(tbody.lastElementChild);
+      }
+      saveDataToLocalStorage();
+    };
+
+    window.calculateGpa = function() {
+      const items = document.querySelectorAll('#gpa-table-body .gpa-item');
+      let totalCredit = 0, totalPoint = 0;
+      let hasData = false;
+      let isIncomplete = false;
+
+      items.forEach(item => {
+        const titleVal = item.querySelector('.gpa-title-input').value.trim();
+        const gradeEl = item.querySelector('.gpa-grade-input');
+        const creditEl = item.querySelector('.gpa-credit-input');
+
+        gradeEl.classList.remove('input-error');
+        creditEl.classList.remove('input-error');
+
+        const gVal = gradeEl.value;
+        const cVal = creditEl.value;
+
+        // หากแถวว่างทั้งหมด (ไม่มีชื่อวิชา ไม่มีเกรด ไม่มีหน่วยกิต) ให้ข้ามแถวนั้น
+        if (titleVal === '' && gVal === '' && cVal === '') {
+          return;
+        }
+
+        // หากมีชื่อวิชา หรือเลือกช่องใดช่องหนึ่งแล้ว ต้องเลือกทั้งเกรดและหน่วยกิตให้ครบ
+        if (gVal === '' || cVal === '') {
+          if (gVal === '') gradeEl.classList.add('input-error');
+          if (cVal === '') creditEl.classList.add('input-error');
+          isIncomplete = true;
+          return;
+        }
+
+        const credit = parseFloat(cVal);
+        const grade = parseFloat(gVal);
+        if (!isNaN(credit) && !isNaN(grade)) {
+          hasData = true;
+          totalCredit += credit;
+          totalPoint += (credit * grade);
+        }
+      });
+
+      if (isIncomplete) {
+        return alert('⚠️ กรุณาเลือก "เกรดที่ได้" และ "หน่วยกิต" ให้ครบทุกวิชาที่ต้องการคำนวณน้า !');
+      }
+      if (!hasData || totalCredit <= 0) {
+        return alert(MSG_MISSING);
+      }
+
+      const gpa = (totalPoint / totalCredit).toFixed(2);
+      const resultBox = document.getElementById('gpa-result');
+      resultBox.innerHTML = `ผลลัพธ์ GPA : <span style="color:#2980b9; font-size:28px; font-weight:600;">${gpa}</span><br><span style="font-size:15px; font-weight:400; color:#5d6d7e;">หน่วยกิตรวมในเทอมนี้ : ${totalCredit} หน่วยกิต</span>`;
+      resultBox.style.display = 'block';
+      document.getElementById('btn-export-gpa').style.display = 'block';
+    };
+
+    // =========================================================
+    // แท็บ 2: คำนวณ GPAX สะสม
+    // =========================================================
+    function createSingleGpaxRow(index, data = {}) {
+      const row = document.createElement('div');
+      row.className = 'gpa-table-row gpax-item';
+      row.innerHTML = `
+        <div class="col-no">${index}</div>
+        <div class="col-title"><input type="text" class="gpax-title-input" placeholder="ระบุเทอม / ปีการศึกษา" value="${data.title || ''}" oninput="saveDataToLocalStorage()"></div>
+        <div class="col-grade"><input type="number" class="gpax-grade-input" placeholder="0.00 - 4.00" step="0.01" value="${data.grade !== undefined ? data.grade : ''}" oninput="validateInputRealtime(this, 'gpa'); saveDataToLocalStorage();"></div>
+        <div class="col-credit"><input type="number" class="gpax-credit-input" placeholder="เช่น 15" step="0.5" value="${data.credit !== undefined ? data.credit : ''}" oninput="validateInputRealtime(this, 'credit'); saveDataToLocalStorage();"></div>
+      `;
+      return row;
+    }
+
+    window.addGpaxRow = function(data = {}) {
+      const tbody = document.getElementById('gpax-table-body');
+      const currentCount = tbody.children.length;
+      tbody.appendChild(createSingleGpaxRow(currentCount + 1, data));
+      document.getElementById('gpax-rows-count').value = currentCount + 1;
+      saveDataToLocalStorage();
+    };
+
+    window.removeGpaxRow = function() {
+      const tbody = document.getElementById('gpax-table-body');
+      const currentCount = tbody.children.length;
+      if (currentCount > 1) {
+        tbody.removeChild(tbody.lastElementChild);
+        document.getElementById('gpax-rows-count').value = currentCount - 1;
+        saveDataToLocalStorage();
+      }
+    };
+
+    window.updateGpaxRowsFromInput = function() {
+      const tbody = document.getElementById('gpax-table-body');
+      let targetCount = parseInt(document.getElementById('gpax-rows-count').value);
+      if (isNaN(targetCount) || targetCount < 1) targetCount = 1;
+      document.getElementById('gpax-rows-count').value = targetCount;
+      let currentCount = tbody.children.length;
+      if (targetCount > currentCount) {
+        for (let i = currentCount + 1; i <= targetCount; i++) tbody.appendChild(createSingleGpaxRow(i));
+      } else if (targetCount < currentCount) {
+        for (let i = currentCount; i > targetCount; i--) tbody.removeChild(tbody.lastElementChild);
+      }
+      saveDataToLocalStorage();
+    };
+
+    window.calculateGpax = function() {
+      const items = document.querySelectorAll('#gpax-table-body .gpax-item');
+      let totalCredit = 0;
+      let totalPoint = 0;
+      let hasData = false;
+      let isInvalid = false;
+      let isPairMissing = false;
+
+      items.forEach(item => {
+        const creditEl = item.querySelector('.gpax-credit-input');
+        const gradeEl = item.querySelector('.gpax-grade-input');
+        
+        const cVal = creditEl.value.trim();
+        const gVal = gradeEl.value.trim();
+
+        if (cVal === '' && gVal === '') return;
+
+        if (cVal === '' || gVal === '') {
+          isPairMissing = true;
+          return;
+        }
+
+        if (!validateInputRealtime(gradeEl, 'gpa') || !validateInputRealtime(creditEl, 'credit')) {
+          isInvalid = true;
+          return;
+        }
+
+        const credit = parseFloat(cVal);
+        const grade = parseFloat(gVal);
+
+        if (!isNaN(credit) && !isNaN(grade) && credit > 0) {
+          hasData = true;
+          totalCredit += credit;
+          totalPoint += (credit * grade);
+        }
+      });
+
+      if (isInvalid) return alert(MSG_INVALID);
+      if (isPairMissing) return alert('⚠️ กรุณากรอกข้อมูล "เกรดเฉลี่ย" และ "หน่วยกิต" ให้ครบในแถวที่ต้องการคำนวณน้า !');
+      if (!hasData) return alert(MSG_MISSING);
+
+      const gpax = (totalPoint / totalCredit).toFixed(2);
+      const resultBox = document.getElementById('gpax-result');
+      resultBox.innerHTML = `ผลลัพธ์ GPAX สะสม : <span style="color:#2980b9; font-size:28px; font-weight:600;">${gpax}</span><br><span style="font-size:15px; font-weight:400; color:#5d6d7e;">หน่วยกิตสะสมรวมทั้งหมด : ${totalCredit} หน่วยกิต</span>`;
+      resultBox.style.display = 'block';
+      document.getElementById('btn-export-gpax').style.display = 'block';
+    };
+
+    // =========================================================
+    // แท็บ 3: คำนวณเกรดเป้าหมาย
+    // =========================================================
+    window.calculateTarget = function() {
+      const curGpaxEl = document.getElementById('tg-current-gpax');
+      const curCreditEl = document.getElementById('tg-current-credit');
+      const tarGpaxEl = document.getElementById('tg-target-gpax');
+      const remCreditEl = document.getElementById('tg-remain-credit');
+      const remTermsEl = document.getElementById('tg-remain-terms');
+
+      const v1 = validateInputRealtime(curGpaxEl, 'gpa');
+      const v2 = validateInputRealtime(curCreditEl, 'credit');
+      const v3 = validateInputRealtime(tarGpaxEl, 'gpa');
+      const v4 = validateInputRealtime(remCreditEl, 'credit');
+      const v5 = validateInputRealtime(remTermsEl, 'terms');
+
+      if (!v1 || !v2 || !v3 || !v4 || !v5) return alert(MSG_INVALID);
+      if (curGpaxEl.value === '' || curCreditEl.value === '' || tarGpaxEl.value === '' || remCreditEl.value === '' || remTermsEl.value === '') return alert(MSG_MISSING);
+
+      const curGpax = parseFloat(curGpaxEl.value);
+      const curCredit = parseFloat(curCreditEl.value);
+      const tarGpax = parseFloat(tarGpaxEl.value);
+      const remCredit = parseFloat(remCreditEl.value);
+      const remTerms = parseFloat(remTermsEl.value);
+
+      if (remCredit <= 0) return alert('⚠️ หน่วยกิตรวมของเทอมที่เหลือต้องมากกว่า 0 น้า !');
+
+      const totalCreditRequired = curCredit + remCredit;
+      const requiredGradePoint = (tarGpax * totalCreditRequired) - (curGpax * curCredit);
+      const requiredGpa = parseFloat((requiredGradePoint / remCredit).toFixed(2));
+
+      const resultBox = document.getElementById('target-result');
+      resultBox.style.display = 'block';
+      let termLabelText = remTerms > 1 ? `เฉลี่ยเทอมละประมาณ` : `ในเทอมสุดท้าย`;
+
+      if (requiredGpa > 4.00) {
+        resultBox.innerHTML = `น้องต้องทำเกรดเฉลี่ยในอีก <b>${remTerms}</b> เทอมที่เหลือ ${termLabelText}<br><span style="font-size:34px;font-weight:600;color:#e74c3c;">${requiredGpa.toFixed(2)}</span><br><span class="gpa-target-badge badge-impossible">🔴 เกรดเฉลี่ยสูงเกิน 4.00 แนะนำให้ลดเป้าหมายลงมา</span>`;
+      } else if (requiredGpa <= 0) {
+        resultBox.innerHTML = `<div style="color:#27ae60; font-weight:600; font-size:22px;">🎉 ยินดีด้วย ! เกรดถึงเป้าหมายแล้ว</div><span class="gpa-target-badge badge-easy" style="margin-top:15px;">🥳 เกรดถึงเป้าหมายแล้ว ยินดีด้วยน้า !</span>`;
+      } else if (requiredGpa <= 3.00) {
+        resultBox.innerHTML = `น้องต้องทำเกรดเฉลี่ยในอีก <b>${remTerms}</b> เทอมที่เหลือ ${termLabelText}<br><span style="font-size:34px;font-weight:600;color:#2980b9;">${requiredGpa.toFixed(2)}</span><br><span class="gpa-target-badge badge-easy">🟢 เป็นไปได้มากสุด ขอให้ตั้งใจสม่ำเสมอนะ !</span>`;
+      } else if (requiredGpa <= 3.75) {
+        resultBox.innerHTML = `น้องต้องทำเกรดเฉลี่ยในอีก <b>${remTerms}</b> เทอมที่เหลือ ${termLabelText}<br><span style="font-size:34px;font-weight:600;color:#2980b9;">${requiredGpa.toFixed(2)}</span><br><span class="gpa-target-badge badge-medium">🟡 ยังเป็นไปได้ ถ้าฮึบสู้ตอนนี้และเต็มที่ทุกวิชา !</span>`;
+      } else {
+        resultBox.innerHTML = `น้องต้องทำเกรดเฉลี่ยในอีก <b>${remTerms}</b> เทอมที่เหลือ ${termLabelText}<br><span style="font-size:34px;font-weight:600;color:#2980b9;">${requiredGpa.toFixed(2)}</span><br><span class="gpa-target-badge badge-hard">🟠 เป็นไปได้นะแต่ต้องไฟท์หนักมาก ! ต้องได้เกรด 4 เกือบทุกวิชา</span>`;
+      }
+      document.getElementById('btn-export-target').style.display = 'block';
+    };
+
+    // =========================================================
+    // แท็บ 4: คำนวณ GPAX 5 กลุ่มสาระ
+    // =========================================================
+    function initGroupsTab() {
+      const container = document.getElementById('groups-container');
+      container.innerHTML = '';
+      subjectGroups.forEach(group => {
+        const box = document.createElement('div');
+        box.className = 'subject-group-box';
+        box.innerHTML = `
+          <h4><span>${group.name}</span><span class="subject-group-badge" id="badge-gpa-${group.id}">GPA: -</span></h4>
+          <div class="gpa-target-grid" style="margin-bottom: 0;">
+            <div class="gpa-input-group"><label style="font-size: 14px;">เกรดเฉลี่ยสะสมในกลุ่มสาระนี้ (GPA)</label><input type="number" id="group-gpa-${group.id}" placeholder="เช่น 3.50" step="0.01" oninput="validateInputRealtime(this,'gpa');calculateSingleGroup('${group.id}')"><span class="gpa-helper-text">💡 ดูเกรดสะสมหมวดนี้ได้ที่ใบ ปพ.1 ด้านหลัง</span></div>
+            <div class="gpa-input-group"><label style="font-size: 14px;">หน่วยกิตรวมในกลุ่มสาระนี้</label><input type="number" id="group-credit-${group.id}" placeholder="เช่น 12.0" step="0.5" oninput="validateInputRealtime(this,'credit');calculateSingleGroup('${group.id}')"><span class="gpa-helper-text">💡 ดูผลรวมหน่วยกิตหมวดนี้จากใบ ปพ.1 ด้านหลัง</span></div>
+          </div>
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    window.calculateSingleGroup = function(groupId) {
+      const gpaEl = document.getElementById(`group-gpa-${groupId}`);
+      const gpaVal = parseFloat(gpaEl.value);
+      const badge = document.getElementById(`badge-gpa-${groupId}`);
+      if (!isNaN(gpaVal) && validateInputRealtime(gpaEl, 'gpa')) badge.innerText = `GPA: ${gpaVal.toFixed(2)}`;
+      else badge.innerText = `GPA: -`;
+      saveDataToLocalStorage();
+    };
+
+    window.calculateGroupsGpax = function() {
+      let totalCredit = 0, totalPoint = 0, hasData = false, isInvalid = false, isPairMissing = false, summaryRowsHTML = '';
+      subjectGroups.forEach(group => {
+        const gpaEl = document.getElementById(`group-gpa-${group.id}`);
+        const creditEl = document.getElementById(`group-credit-${group.id}`);
+        const gVal = gpaEl.value.trim();
+        const cVal = creditEl.value.trim();
+
+        if (gVal === '' && cVal === '') return;
+        if (gVal === '' || cVal === '') { isPairMissing = true; return; }
+        if (!validateInputRealtime(gpaEl, 'gpa') || !validateInputRealtime(creditEl, 'credit')) { isInvalid = true; return; }
+
+        const gpa = parseFloat(gVal);
+        const credit = parseFloat(cVal);
+        if (!isNaN(gpa) && !isNaN(credit) && credit > 0) {
+          hasData = true;
+          totalCredit += credit;
+          totalPoint += (gpa * credit);
+          summaryRowsHTML += `<tr><td style="text-align:left;">${group.name}</td><td><b>${gpa.toFixed(2)}</b></td><td>${credit}</td></tr>`;
+        }
+      });
+
+      if (isInvalid) return alert(MSG_INVALID);
+      if (isPairMissing) return alert('⚠️ กรุณากรอก "เกรดเฉลี่ย" และ "หน่วยกิต" ให้ครบทั้งคู่ในกลุ่มสาระที่ต้องการคำนวณน้า !');
+      if (!hasData) return alert(MSG_MISSING);
+
+      const overallGpax = (totalPoint / totalCredit).toFixed(2);
+      const resultBox = document.getElementById('groups-result');
+      resultBox.innerHTML = `
+        ผลลัพธ์ GPAX เฉลี่ย 5 กลุ่มสาระ : <span style="color:#2980b9; font-size:28px; font-weight:600;">${overallGpax}</span><br>
+        <span style="font-size:15px; font-weight:400; color:#5d6d7e;">หน่วยกิตรวมทั้ง 5 กลุ่มสาระ : ${totalCredit} หน่วยกิต</span>
+        <table class="subject-summary-table">
+          <thead><tr><th>กลุ่มสาระการเรียนรู้</th><th>GPA</th><th>หน่วยกิต</th></tr></thead>
+          <tbody>${summaryRowsHTML}</tbody>
+        </table>
+      `;
+      resultBox.style.display = 'block';
+      document.getElementById('btn-export-groups').style.display = 'block';
+    };
+
+    // =========================================================
+    // บันทึกและโหลดข้อมูลอัตโนมัติ (LocalStorage) & บันทึกภาพผลลัพธ์
+    // =========================================================
+    window.saveDataToLocalStorage = function() {
+      try {
+        const gpaRows = Array.from(document.querySelectorAll('#gpa-table-body .gpa-item')).map(row => ({
+          title: row.querySelector('.gpa-title-input').value,
+          grade: row.querySelector('.gpa-grade-input').value,
+          credit: row.querySelector('.gpa-credit-input').value
+        }));
+        const gpaxRows = Array.from(document.querySelectorAll('#gpax-table-body .gpax-item')).map(row => ({
+          title: row.querySelector('.gpax-title-input').value,
+          grade: row.querySelector('.gpax-grade-input').value,
+          credit: row.querySelector('.gpax-credit-input').value
+        }));
+        const groupsData = {};
+        subjectGroups.forEach(g => {
+          groupsData[g.id] = {
+            gpa: document.getElementById(`group-gpa-${g.id}`)?.value || '',
+            credit: document.getElementById(`group-credit-${g.id}`)?.value || ''
+          };
+        });
+        const payload = {
+          studyTrack: document.getElementById('gpa-study-track').value,
+          gpaRows,
+          gpaxRows,
+          target: {
+            curGpax: document.getElementById('tg-current-gpax').value,
+            curCredit: document.getElementById('tg-current-credit').value,
+            tarGpax: document.getElementById('tg-target-gpax').value,
+            remCredit: document.getElementById('tg-remain-credit').value,
+            remTerms: document.getElementById('tg-remain-terms').value
+          },
+          groups: groupsData
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {}
+    };
+
+    function loadDataFromLocalStorage() {
+      initGroupsTab();
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
+
+      const gpaBody = document.getElementById('gpa-table-body');
+      const gpaxBody = document.getElementById('gpax-table-body');
+      gpaBody.innerHTML = '';
+      gpaxBody.innerHTML = '';
+
+      if (saved && saved.gpaRows && saved.gpaRows.length > 0) {
+        if (saved.studyTrack) document.getElementById('gpa-study-track').value = saved.studyTrack;
+        saved.gpaRows.forEach((item, idx) => gpaBody.appendChild(createSingleGpaRow(idx + 1, item)));
+        document.getElementById('gpa-rows-count').value = saved.gpaRows.length;
+      } else {
+        for (let i = 1; i <= 3; i++) gpaBody.appendChild(createSingleGpaRow(i));
+        document.getElementById('gpa-rows-count').value = 3;
+      }
+
+      if (saved && saved.gpaxRows && saved.gpaxRows.length > 0) {
+        saved.gpaxRows.forEach((item, idx) => gpaxBody.appendChild(createSingleGpaxRow(idx + 1, item)));
+        document.getElementById('gpax-rows-count').value = saved.gpaxRows.length;
+      } else {
+        for (let i = 1; i <= 3; i++) gpaxBody.appendChild(createSingleGpaxRow(i));
+        document.getElementById('gpax-rows-count').value = 3;
+      }
+
+      if (saved && saved.target) {
+        document.getElementById('tg-current-gpax').value = saved.target.curGpax || '';
+        document.getElementById('tg-current-credit').value = saved.target.curCredit || '';
+        document.getElementById('tg-target-gpax').value = saved.target.tarGpax || '';
+        document.getElementById('tg-remain-credit').value = saved.target.remCredit || '';
+        document.getElementById('tg-remain-terms').value = saved.target.remTerms || '';
+      }
+
+      if (saved && saved.groups) {
+        subjectGroups.forEach(g => {
+          if (saved.groups[g.id]) {
+            document.getElementById(`group-gpa-${g.id}`).value = saved.groups[g.id].gpa || '';
+            document.getElementById(`group-credit-${g.id}`).value = saved.groups[g.id].credit || '';
+            calculateSingleGroup(g.id);
+          }
+        });
+      }
+    }
+
+    window.exportToImage = function(tabId, btnId, fileName) {
+      const wrapper = document.getElementById('gpa-main-wrapper');
+      const tabEl = document.getElementById(tabId);
+      const exportBtn = document.getElementById(btnId);
+      const calcBtn = tabEl.querySelector('.gpa-btn-calc-main');
+
+      wrapper.classList.add('exporting-mode');
+      exportBtn.style.visibility = 'hidden';
+      if (calcBtn) calcBtn.style.visibility = 'hidden';
+
+      html2canvas(tabEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+        wrapper.classList.remove('exporting-mode');
+        exportBtn.style.visibility = 'visible';
+        if (calcBtn) calcBtn.style.visibility = 'visible';
+
+        const link = document.createElement('a');
+        link.download = `${fileName}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }).catch(() => {
+        wrapper.classList.remove('exporting-mode');
+        exportBtn.style.visibility = 'visible';
+        if (calcBtn) calcBtn.style.visibility = 'visible';
+      });
+    };
+
+    loadDataFromLocalStorage();
+  })();
+</script>
